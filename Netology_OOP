@@ -1,0 +1,227 @@
+import numpy
+
+
+class Student:
+    all_students = []
+
+    def __init__(self, name, surname, gender):
+        self.name = name
+        self.surname = surname
+        self.gender = gender
+        self.finished_courses = []
+        self.courses_in_progress = []
+        self.grades = {}
+        Student.all_students.append(self)
+
+# средняя оценка за домашние задания
+    def average_score(self):
+        all_marks = []
+        if len(self.grades) != 0:
+            for mark in self.grades.values():
+                for el in mark:
+                    el = int(el)
+                    all_marks.append(el)
+            av_score = numpy.average(all_marks)
+            return round(av_score, 1)
+        else:
+            return f'у студента нет оценок'
+
+# реализация магического метода __str__
+    def __str__(self):
+        return f'Имя: {self.name}\n' \
+                f'Фамилия: {self.surname}\n' \
+                f'Средняя оценка за домашние задания: {self.average_score()}\n' \
+                f'Курсы в процессе изучения: {", ".join(self.courses_in_progress)}\n' \
+                f'Завершённые курсы: {", ".join(self.finished_courses)}'
+
+# студенты выставляют оценки лекторам
+    def marks(self, course, lecturer, mark):
+        return lecturer.get_marks(course, lecturer, mark)
+
+# реализация магического метода __cmp__
+    def __cmp__(self, other):
+        if len(self.grades) != 0 and len(other.grades) != 0:
+            if self.average_score() > other.average_score():
+                print(f'У студента {self.surname} средняя оценка домашних заданий выше, чем у {other.surname}: '
+                      f'{self.average_score()} и {other.average_score()} соответственно.')
+            elif self.average_score() < other.average_score():
+                print(f'У студента {self.surname} средняя оценка домашних заданий ниже, чем у {other.surname}: '
+                      f'{self.average_score()} и {other.average_score()} соответственно.')
+            else:
+                print(f'Студенты {self.surname} и {other.surname} имеют равную среднюю оценку за домашние задания: '
+                      f'{self.average_score()}.')
+        else:
+            print('У одного из студентов нет оценок.')
+
+
+class Mentor:
+    def __init__(self, name, surname):
+        self.name = name
+        self.surname = surname
+        self.courses_attached = []
+
+
+class Lecturer(Mentor):
+    all_lecturers = []
+
+    def __init__(self, name, surname):
+        super().__init__(name, surname)
+        self.marks = {}
+        Lecturer.all_lecturers.append(self)
+
+# полученные оценки от студентов
+    def get_marks(self, course, lecturer, mark):
+        if isinstance(lecturer, Lecturer) and course in self.courses_attached:
+            if course in self.marks:
+                self.marks[course] += [mark]
+            else:
+                self.marks[course] = [mark]
+                print(f'Готово! Вы оценили работу преподавателя на {mark} баллов.')
+        else:
+            print('Ошибка')
+
+# средняя оценка качества преподавания
+    def average_score(self):
+        all_marks = []
+        if len(self.marks) != 0:
+            for mark in self.marks.values():
+                for el in mark:
+                    all_marks.append(el)
+            av_score = numpy.average(all_marks)
+            return round(av_score, 1)
+        else:
+            return f'у преподавателя пока нет оценок'
+
+# реализация магического метода __str__
+    def __str__(self):
+        return f'Имя: {self.name}\n' \
+               f'Фамилия: {self.surname}\n' \
+               f'Средняя оценка: {self.average_score()}'
+
+# реализация магического метода __cmp__
+    def __cmp__(self, other):
+        if len(self.marks) != 0 and len(other.marks) != 0:
+            if self.average_score() > other.average_score():
+                print(f'У преподавателя {self.surname} средняя оценка качества преподавания выше, '
+                      f'чем у {other.surname}: '
+                      f'{self.average_score()} и {other.average_score()} соответственно.')
+            elif self.average_score() < other.average_score():
+                print(f'У преподавателя {self.surname} средняя оценка качества преподавания ниже, '
+                      f'чем у {other.surname}: '
+                      f'{self.average_score()} и {other.average_score()} соответственно.')
+            else:
+                print(f'Преподаватели {self.surname} и {other.surname} имеют равную среднюю оценку качества '
+                      f'преподавания: '
+                      f'{self.average_score()}.')
+        else:
+            print('У одного из преподавателей нет оценок.')
+
+
+class Reviewer(Mentor):
+
+    def rate_hw(self, student, course, grade):
+        if isinstance(student, Student) and course in self.courses_attached and course in student.courses_in_progress:
+            if course in student.grades:
+                student.grades[course] += [grade]
+            else:
+                student.grades[course] = [grade]
+        else:
+            return 'Ошибка'
+
+# реализация магического метода __str__
+    def __str__(self):
+        return f'Имя: {self.name}\n' \
+               f'Фамилия: {self.surname}'
+
+
+# подсчёт средней оценки по всем домашним заданиям по курсу
+def course_score_st(students, course):
+    all_hw = []
+    message = 'У курса нет оценок.'
+    for student in students:
+        if course in student.grades:
+            for el in student.grades[course]:
+                all_hw.append(el)
+                av_score = numpy.average(all_hw)
+                message = f'Средняя оценка за домашние задания по курсу "{course}": {round(av_score, 1)}'
+    print(message)
+
+
+# подсчёт средней оценки качества преподавания на курсе
+def course_score_lec(lecturers, course):
+    all_feedback = []
+    message = 'У курса нет оценок.'
+    for lecturer in lecturers:
+        if course in lecturer.marks:
+            for el in lecturer.marks[course]:
+                all_feedback.append(el)
+                av_score = numpy.average(all_feedback)
+                message = f'Средняя оценка за преподавание на курсе "{course}": {round(av_score, 1)}'
+    print(message)
+
+
+# создание 2-х объектов каждого класса
+student_1 = Student('Иосиф', 'Бродский', 'мужчина')
+student_2 = Student('Анна', 'Ахматова', 'женщина')
+student_3 = Student('Вячеслав', 'Иванов', 'мужчина')
+student_1.courses_in_progress.append('История русской литературы')
+student_1.courses_in_progress.append('Русская словесность')
+student_1.finished_courses.append('Проблемы перевода')
+student_2.courses_in_progress.append('История русской литературы')
+student_2.courses_in_progress.append('Голос женщины в поэзии')
+student_2.finished_courses.append('Феномен Пушкина в русской культуре')
+lecturer_1 = Lecturer('Фёдор', 'Достоевский')
+lecturer_1.courses_attached.append('История русской литературы')
+lecturer_1.courses_attached.append('Феномен Пушкина в русской культуре')
+lecturer_2 = Lecturer('Александр', 'Пушкин')
+lecturer_2.courses_attached.append('История русской литературы')
+lecturer_2.courses_attached.append('Голос женщины в поэзии')
+lecturer_2.courses_attached.append('Русская словесность')
+lecturer_3 = Lecturer('Сергей', 'Довлатов')
+reviewer_1 = Reviewer('Николай', 'Гумилёв')
+reviewer_2 = Reviewer('Евгений', 'Баратынский')
+
+
+# применение созданных методов
+print('---Примеры вывода данных---')
+print('Student')
+print(student_1)
+print('Lecturer')
+print(lecturer_2)
+print('Reviewer')
+print(reviewer_2)
+print()
+print('---Оценка преподавателя студентом---')
+student_1.marks('История русской литературы', lecturer_1, 10)
+student_1.marks('История русской литературы', lecturer_2, 9)
+print(lecturer_1)
+student_2.marks('Голос женщины в поэзии', lecturer_2, 9)
+student_1.marks('Русская словесность', lecturer_2, 10)
+print(lecturer_2)
+print()
+print('---Сравнение оценок преподавателей---')
+lecturer_1.__cmp__(lecturer_2)
+lecturer_1.__cmp__(lecturer_3)
+print()
+print('---Сравнение оценок студентов---')
+reviewer_1.courses_attached.append('Голос женщины в поэзии')
+reviewer_1.courses_attached.append('Проблемы перевода')
+reviewer_1.rate_hw(student_2, 'Голос женщины в поэзии', 10)
+reviewer_1.rate_hw(student_1, 'Проблемы перевода', 9)
+reviewer_2.courses_attached.append('Русская словесность')
+reviewer_2.courses_attached.append('История русской литературы')
+reviewer_2.rate_hw(student_1, 'История русской литературы', 8)
+reviewer_2.rate_hw(student_2, 'История русской литературы', 9)
+reviewer_2.rate_hw(student_2, 'История русской литературы', 7)
+student_1.__cmp__(student_2)
+student_1.__cmp__(student_3)
+print()
+print('---Вывод средней оценки за все домашние задания по курсу---')
+course_score_st(Student.all_students, 'История русской литературы')
+course_score_st(Student.all_students, 'Голос женщины в поэзии')
+course_score_st(Student.all_students, 'Феномен Пушкина в русской культуре')
+print()
+print('---Вывод средней оценки качества преподавания на курсе---')
+course_score_lec(Lecturer.all_lecturers, 'История русской литературы')
+course_score_lec(Lecturer.all_lecturers, 'Голос женщины в поэзии')
+course_score_lec(Lecturer.all_lecturers, 'Феномен Пушкина в русской культуре')
