@@ -38,8 +38,8 @@ class Student:
     def marks(self, course, lecturer, mark):
         return lecturer.get_marks(course, lecturer, mark)
 
-# реализация магического метода __cmp__
-    def __cmp__(self, other):
+# реализация магического метода __lt__
+    def __lt__(self, other):
         if len(self.grades) != 0 and len(other.grades) != 0:
             if self.average_score() > other.average_score():
                 print(f'У студента {self.surname} средняя оценка домашних заданий выше, чем у {other.surname}: '
@@ -98,15 +98,15 @@ class Lecturer(Mentor):
                f'Фамилия: {self.surname}\n' \
                f'Средняя оценка: {self.average_score()}'
 
-# реализация магического метода __cmp__
-    def __cmp__(self, other):
+# реализация магического метода __Lt__
+    def __lt__(self, other):
         if len(self.marks) != 0 and len(other.marks) != 0:
-            if self.average_score() > other.average_score():
-                print(f'У преподавателя {self.surname} средняя оценка качества преподавания выше, '
+            if self.average_score() < other.average_score():
+                print(f'У преподавателя {self.surname} средняя оценка качества преподавания ниже, '
                       f'чем у {other.surname}: '
                       f'{self.average_score()} и {other.average_score()} соответственно.')
-            elif self.average_score() < other.average_score():
-                print(f'У преподавателя {self.surname} средняя оценка качества преподавания ниже, '
+            elif self.average_score() > other.average_score():
+                print(f'У преподавателя {self.surname} средняя оценка качества преподавания выше, '
                       f'чем у {other.surname}: '
                       f'{self.average_score()} и {other.average_score()} соответственно.')
             else:
@@ -200,8 +200,8 @@ student_1.marks('Русская словесность', lecturer_2, 10)
 print(lecturer_2)
 print()
 print('---Сравнение оценок преподавателей---')
-lecturer_1.__cmp__(lecturer_2)
-lecturer_1.__cmp__(lecturer_3)
+lecturer_1.__lt__(lecturer_2)
+lecturer_1.__lt__(lecturer_3)
 print()
 print('---Сравнение оценок студентов---')
 reviewer_1.courses_attached.append('Голос женщины в поэзии')
@@ -213,8 +213,8 @@ reviewer_2.courses_attached.append('История русской литерат
 reviewer_2.rate_hw(student_1, 'История русской литературы', 8)
 reviewer_2.rate_hw(student_2, 'История русской литературы', 9)
 reviewer_2.rate_hw(student_2, 'История русской литературы', 7)
-student_1.__cmp__(student_2)
-student_1.__cmp__(student_3)
+student_1.__lt__(student_2)
+student_1.__lt__(student_3)
 print()
 print('---Вывод средней оценки за все домашние задания по курсу---')
 course_score_st(Student.all_students, 'История русской литературы')
